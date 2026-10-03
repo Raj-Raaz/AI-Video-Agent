@@ -40,3 +40,13 @@ def chunk_audio(input_file:str, chunk_minutes:int=10) -> list:
         chunk.export(chunk_file, format="wav")
         chunks.append(chunk_file)
     return chunks
+
+def process_input_audio(input_file:str) -> list:
+    if input_file.startswith(("http://", "https://")):
+        print(f"Downloading audio from YouTube URL: {input_file}")
+        input_file = download_audio_from_youtube(input_file)
+    else:
+        print(f"Processing local audio file: {input_file}")
+
+    converted_file = convert_audio_to_wav(input_file)
+    return chunk_audio(converted_file)
