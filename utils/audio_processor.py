@@ -1,5 +1,4 @@
 import os
-
 import yt_dlp
 from pydub import AudioSegment
 
@@ -23,5 +22,21 @@ def download_audio_from_youtube(url:str) -> str:
         filename = ydl.prepare_filename(info_dict).replace('.webm', '.wav').replace('.m4a', '.wav').replace('.mp4', '.wav')
     return filename
 
-print(download_audio_from_youtube("https://www.youtube.com/watch?v=T-D1OfcDW1M"))
-      
+
+def convert_audio_to_wav(input_file:str) -> str:
+    output_file = os.path.splitext(input_file)[0] + "_converted.wav"
+    audio = AudioSegment.from_file(input_file)
+    audio = audio.set_channels(1).set_frame_rate(16000)
+    audio.export(output_file, format="wav")
+    return output_file
+
+def chunk_audio(input_file:str, chunk_minutes:int=10) -> list:
+    chunk_length_ms = chunk_minutes * 60 * 1000
+    audio = AudioSegment.from_file(input_file)
+    chunks = []
+    for i in range(0, len(audio), chunk_length_ms):
+        chunk = audio[i:i + chunk_length_ms]
+        chunk_file = os.path.splitext(input_file)[0] + f"_chunk_{i // chunk_length_ms}.wav"
+        chunk.export(chunk_file, format="wav")
+        chunks.append(chunk_file)
+    return chunks
